@@ -1,22 +1,23 @@
 using Microsoft.EntityFrameworkCore;
 using MottuBracelet.Data;
 using MottuBracelet.Services;
-using Oracle.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adiciona serviços de controller
-builder.Services.AddControllers();
+// Lê variáveis de ambiente do .env
+var server = Environment.GetEnvironmentVariable("DB_HOST");
+var port = Environment.GetEnvironmentVariable("DB_PORT") ?? "1433"; // padrão SQL Server
+var database = Environment.GetEnvironmentVariable("DB_NAME");
+var user = Environment.GetEnvironmentVariable("DB_USER");
+var password = Environment.GetEnvironmentVariable("DB_PASS");
 
-// Configura Swagger/OpenAPI
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// Monta a connection string do SQL Server
+var connectionString = $"Server={server},{port};Database={database};User Id={user};Password={password};TrustServerCertificate=True;Encrypt=True;";
 
-// Configura a conexão com SQL Server
+// Configura o DbContext com SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.EnableRetryOnFailure(
+    options.UseSqlServer(connectionString, sqlOptions =>
+        sqlOptions.EnableRetryOnFailure(
             maxRetryCount: 5,
             maxRetryDelay: TimeSpan.FromSeconds(10),
             errorNumbersToAdd: null
@@ -24,8 +25,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
+// Adiciona serviços e controllers
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-// Registra os serviços da aplicação
 builder.Services.AddScoped<ServicoMotos>();
 builder.Services.AddScoped<ServicoPatios>();
 builder.Services.AddScoped<ServicoDispositivos>();
@@ -42,8 +46,5 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
-
-// Mapeia os controllers
 app.MapControllers();
-
 app.Run();
