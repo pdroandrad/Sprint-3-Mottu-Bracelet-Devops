@@ -1,0 +1,85 @@
+# =========================
+# Visual Studio
+# =========================
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.opendb
+
+# =========================
+# Build
+# =========================
+bin/
+obj/
+[Rr]elease/
+[Dd]ebug/
+x64/
+x86/
+*.dll
+*.exe
+*.app
+*.pdb
+
+# =========================
+# Pacotes NuGet
+# =========================
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# =========================
+# Logs e arquivos temporários
+# =========================
+*.log
+*.tlog
+*.tmp
+*.cache
+*.bak
+
+# =========================
+# Configurações locais
+# =========================
+appsettings.Development.json
+launchSettings.json
+.env
+.env*
+
+# =========================
+# Rider
+# =========================
+.idea/
+
+# =========================
+# Resharper
+# =========================
+_ReSharper*/
+*.DotSettings.user
+
+# =========================
+# Testes
+# =========================
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# =========================
+# Publicação e pacotes
+# =========================
+*.publish.xml
+*.deploy.cmd
+*.deploy.targets
+*.deploy.ps1
+
+# =========================
+# Outras pastas/arquivos desnecessários
+# =========================
+*.dbmdl
+*.bak
+*.swp
+*.sublime-workspace
+*.sublime-project
