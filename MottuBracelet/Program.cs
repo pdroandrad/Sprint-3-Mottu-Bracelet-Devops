@@ -5,18 +5,27 @@ using Oracle.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adiciona serviÁos de controller
+// Adiciona servi√ßos de controller
 builder.Services.AddControllers();
 
 // Configura Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configura a conex„o com Oracle
+// Configura a conex√£o com SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseOracle(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null
+        )
+    )
+);
 
-// Registra os serviÁos da aplicaÁ„o
+
+// Registra os servi√ßos da aplica√ß√£o
 builder.Services.AddScoped<ServicoMotos>();
 builder.Services.AddScoped<ServicoPatios>();
 builder.Services.AddScoped<ServicoDispositivos>();
