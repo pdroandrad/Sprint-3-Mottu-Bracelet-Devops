@@ -33,4 +33,6 @@ jobs:
         app-name: 'mottubracelet-rm558186'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_b441e8ca41ea47dcb3e272be7e932586 }}
-        package: ${{env.DOTNET_ROOT}}/myapp 
+        package: ${{env.DOTNET_ROOT}}/myapp
+      env: 
+         ConnectionStrings__DefaultConnection: ${{ secrets.DefaultConnection }}
