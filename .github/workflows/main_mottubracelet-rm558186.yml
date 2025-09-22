@@ -34,3 +34,7 @@ jobs:
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_cbb608c0a2744656b3f714ab3202296c }}
         package: ${{env.DOTNET_ROOT}}/myapp 
+      env: 
+        DOTNET_CONNECTION_STRING: ${{ secrets.DOTNET_CONNECTION_STRING }}
+        APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}
+
