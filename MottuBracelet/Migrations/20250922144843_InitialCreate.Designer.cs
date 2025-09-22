@@ -12,15 +12,15 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace MottuBracelet.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250517142349_AtualizaRelacionamentoMotoDispositivo")]
-    partial class AtualizaRelacionamentoMotoDispositivo
+    [Migration("20250922144843_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.5")
+                .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);

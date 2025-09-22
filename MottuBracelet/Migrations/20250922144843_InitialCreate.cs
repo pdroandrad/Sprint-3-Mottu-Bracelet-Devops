@@ -40,7 +40,8 @@ namespace MottuBracelet.Migrations
                         .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
                     Imei = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
                     Placa = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
-                    PatioId = table.Column<int>(type: "NUMBER(10)", nullable: true)
+                    PatioId = table.Column<int>(type: "NUMBER(10)", nullable: true),
+                    DispositivoId = table.Column<int>(type: "NUMBER(10)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -69,7 +70,8 @@ namespace MottuBracelet.Migrations
                         name: "FK_DISPOSITIVO_NET_MOTO_NET_MotoId",
                         column: x => x.MotoId,
                         principalTable: "MOTO_NET",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_DISPOSITIVO_NET_PATIO_NET_PatioId",
                         column: x => x.PatioId,
