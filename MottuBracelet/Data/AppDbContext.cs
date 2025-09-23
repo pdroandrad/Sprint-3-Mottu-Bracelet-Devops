@@ -5,7 +5,8 @@ namespace MottuBracelet.Data
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options) 
+            : base(options)
         {
         }
 
@@ -29,9 +30,19 @@ namespace MottuBracelet.Data
                 .HasForeignKey<Dispositivo>(d => d.MotoId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Endereço é um tipo próprio dentro de Patio
+            // Configurar Endereco como tipo próprio dentro de Patio
             modelBuilder.Entity<Patio>()
-                .OwnsOne(p => p.Endereco);
+                .OwnsOne(p => p.Endereco, endereco =>
+                {
+                    // Configurações opcionais: mapear colunas se quiser nomes específicos
+                    endereco.Property(e => e.Rua).HasColumnName("RUA");
+                    endereco.Property(e => e.Numero).HasColumnName("NUMERO");
+                    endereco.Property(e => e.Cidade).HasColumnName("CIDADE");
+                    endereco.Property(e => e.Estado).HasColumnName("ESTADO");
+                    endereco.Property(e => e.CEP).HasColumnName("CEP");
+                });
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }
