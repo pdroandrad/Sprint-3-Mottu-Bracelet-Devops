@@ -16,7 +16,7 @@ namespace MottuBracelet.Services
 
         public async Task<List<Patio>> ObterPaginadoAsync(int pageNumber, int pageSize)
         {
-            return await _context.Patio
+            return await _context.Patios
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -24,24 +24,24 @@ namespace MottuBracelet.Services
 
         public async Task<int> ContarAsync()
         {
-            return await _context.Patio.CountAsync();
+            return await _context.Patios.CountAsync();
         }
 
         public async Task<Patio?> ObterPorIdAsync(int id)
         {
-            return await _context.Patio.FindAsync(id);
+            return await _context.Patios.FindAsync(id);
         }
 
         public async Task<Patio> CriarAsync(Patio patio)
         {
-            _context.Patio.Add(patio);
+            _context.Patios.Add(patio);
             await _context.SaveChangesAsync();
             return patio;
         }
 
         public async Task<bool> AtualizarAsync(int id, Patio patioAtualizado)
         {
-            var existe = await _context.Patio.AnyAsync(p => p.Id == id);
+            var existe = await _context.Patios.AnyAsync(p => p.Id == id);
             if (!existe) return false;
 
             patioAtualizado.Id = id;
@@ -52,10 +52,10 @@ namespace MottuBracelet.Services
 
         public async Task<bool> RemoverAsync(int id)
         {
-            var patio = await _context.Patio.FindAsync(id);
+            var patio = await _context.Patios.FindAsync(id);
             if (patio == null) return false;
 
-            _context.Patio.Remove(patio);
+            _context.Patios.Remove(patio);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -68,7 +68,15 @@ namespace MottuBracelet.Services
                 Nome = patio.Nome,
                 CapacidadeMaxima = patio.CapacidadeMaxima,
                 AdministradorResponsavel = patio.AdministradorResponsavel,
-                Endereco = patio.Endereco,
+                Endereco = new DTO.EnderecoDto
+                {
+                    Logradouro = patio.Endereco.Logradouro,
+                    Numero = patio.Endereco.Numero,
+                    Cep = patio.Endereco.Cep,
+                    Complemento = patio.Endereco.Complemento,
+                    Cidade = patio.Endereco.Cidade,
+                    Pais = patio.Endereco.Pais
+                },
                 Links = new List<LinkDto>
                 {
                     new LinkDto { Href = $"{urlBase}/patio/{patio.Id}", Rel = "self", Method = "GET" },

@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MottuBracelet.Services;
 using MottuBracelet.Model;
+using MottuBracelet.DTO;
 
 namespace MottuBracelet.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DispositivoController : Controller
+    public class DispositivoController : ControllerBase
     {
         private readonly ServicoDispositivos _servico;
 
@@ -15,22 +16,23 @@ namespace MottuBracelet.Controllers
             _servico = servico;
         }
 
-        // Método para obter todos os dispositivos cadastrados, aceitando a paginação.
         [HttpGet]
-        public async Task<ActionResult<List<Dispositivo>>> ObterTodos(
+        public async Task<ActionResult<List<DispositivoHateoasDto>>> ObterTodos(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
             var dispositivos = await _servico.ObterPaginadoAsync(pageNumber, pageSize);
             var total = await _servico.ContarAsync();
-
             Response.Headers.Add("X-Total-Count", total.ToString());
-            return dispositivos;
+
+            var urlBase = $"{Request.Scheme}://{Request.Host}/api";
+            var dispositivosDto = dispositivos.Select(d => _servico.MontarDispositivoComLinks(d, urlBase)).ToList();
+
+            return Ok(dispositivosDto);
         }
 
-        // Método para obter um dispositivo pelo ID.
         [HttpGet("{id:int}", Name = "ObterDispositivo")]
-        public async Task<ActionResult<Dispositivo>> ObterPorId(int id)
+        public async Task<ActionResult<DispositivoHateoasDto>> ObterPorId(int id)
         {
             var dispositivo = await _servico.ObterPorIdAsync(id);
             if (dispositivo == null) return NotFound();
@@ -41,17 +43,19 @@ namespace MottuBracelet.Controllers
             return Ok(dispositivoHateoas);
         }
 
-        // Método para criar um novo dispositivo.
         [HttpPost]
-        public async Task<ActionResult<Dispositivo>> Criar(Dispositivo dispositivo)
+        public async Task<ActionResult<DispositivoHateoasDto>> Criar(Dispositivo dispositivo)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             await _servico.CriarAsync(dispositivo);
-            return CreatedAtRoute("ObterDispositivo", new { id = dispositivo.Id }, dispositivo);
+
+            var urlBase = $"{Request.Scheme}://{Request.Host}/api";
+            var dispositivoHateoas = _servico.MontarDispositivoComLinks(dispositivo, urlBase);
+
+            return CreatedAtRoute("ObterDispositivo", new { id = dispositivo.Id }, dispositivoHateoas);
         }
 
-        // Método para atualizar os dados de um dispositivo existente.
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Atualizar(int id, Dispositivo dispositivoAtualizado)
         {
@@ -59,7 +63,6 @@ namespace MottuBracelet.Controllers
             return atualizado ? NoContent() : NotFound();
         }
 
-        // Método para remover um dispositivo pelo ID.
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Remover(int id)
         {

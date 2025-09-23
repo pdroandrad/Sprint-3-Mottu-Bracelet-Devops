@@ -1,6 +1,4 @@
-﻿using MottuBracelet.Model;
-
-namespace MottuBracelet.DTO
+﻿namespace MottuBracelet.DTO
 {
     public class MotoHateoasDto
     {

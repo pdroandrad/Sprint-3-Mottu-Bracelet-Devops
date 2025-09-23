@@ -5,11 +5,12 @@ namespace MottuBracelet.Data
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) 
+        public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }
 
+        // DbSets das entidades
         public DbSet<Patio> Patios { get; set; }
         public DbSet<Dispositivo> Dispositivos { get; set; }
         public DbSet<Moto> Motos { get; set; }
@@ -17,7 +18,7 @@ namespace MottuBracelet.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Mapear nomes das tabelas no SQL Server
+            // Mapear nomes das tabelas
             modelBuilder.Entity<Moto>().ToTable("MOTO_NET");
             modelBuilder.Entity<Patio>().ToTable("PATIO_NET");
             modelBuilder.Entity<Dispositivo>().ToTable("DISPOSITIVO_NET");
@@ -30,16 +31,30 @@ namespace MottuBracelet.Data
                 .HasForeignKey<Dispositivo>(d => d.MotoId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            // Relação opcional: Moto -> Patio
+            modelBuilder.Entity<Moto>()
+                .HasOne(m => m.Patio)
+                .WithMany()
+                .HasForeignKey(m => m.PatioId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Relação opcional: Dispositivo -> Patio
+            modelBuilder.Entity<Dispositivo>()
+                .HasOne(d => d.Patio)
+                .WithMany()
+                .HasForeignKey(d => d.PatioId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Configurar Endereco como tipo próprio dentro de Patio
             modelBuilder.Entity<Patio>()
                 .OwnsOne(p => p.Endereco, endereco =>
                 {
-                    // Configurações opcionais: mapear colunas se quiser nomes específicos
-                    endereco.Property(e => e.Rua).HasColumnName("RUA");
+                    endereco.Property(e => e.Logradouro).HasColumnName("LOGRADOURO");
                     endereco.Property(e => e.Numero).HasColumnName("NUMERO");
                     endereco.Property(e => e.Cidade).HasColumnName("CIDADE");
-                    endereco.Property(e => e.Estado).HasColumnName("ESTADO");
-                    endereco.Property(e => e.CEP).HasColumnName("CEP");
+                    endereco.Property(e => e.Pais).HasColumnName("PAIS");
+                    endereco.Property(e => e.Cep).HasColumnName("CEP");
+                    endereco.Property(e => e.Complemento).HasColumnName("COMPLEMENTO");
                 });
 
             base.OnModelCreating(modelBuilder);

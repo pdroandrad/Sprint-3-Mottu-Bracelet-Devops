@@ -14,34 +14,39 @@ namespace MottuBracelet.Services
             _context = context;
         }
 
+        // Obter lista paginada de dispositivos
         public async Task<List<Dispositivo>> ObterPaginadoAsync(int pageNumber, int pageSize)
         {
-            return await _context.Dispositivo
+            return await _context.Dispositivos
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
         }
 
+        // Contar total de dispositivos
         public async Task<int> ContarAsync()
         {
-            return await _context.Dispositivo.CountAsync();
+            return await _context.Dispositivos.CountAsync();
         }
 
+        // Obter dispositivo por ID
         public async Task<Dispositivo?> ObterPorIdAsync(int id)
         {
-            return await _context.Dispositivo.FindAsync(id);
+            return await _context.Dispositivos.FindAsync(id);
         }
 
+        // Criar novo dispositivo
         public async Task<Dispositivo> CriarAsync(Dispositivo dispositivo)
         {
-            _context.Dispositivo.Add(dispositivo);
+            _context.Dispositivos.Add(dispositivo);
             await _context.SaveChangesAsync();
             return dispositivo;
         }
 
+        // Atualizar dispositivo existente
         public async Task<bool> AtualizarAsync(int id, Dispositivo dispositivoAtualizado)
         {
-            var existe = await _context.Dispositivo.AnyAsync(d => d.Id == id);
+            var existe = await _context.Dispositivos.AnyAsync(d => d.Id == id);
             if (!existe) return false;
 
             dispositivoAtualizado.Id = id;
@@ -50,22 +55,24 @@ namespace MottuBracelet.Services
             return true;
         }
 
+        // Remover dispositivo
         public async Task<bool> RemoverAsync(int id)
         {
-            var dispositivo = await _context.Dispositivo.FindAsync(id);
+            var dispositivo = await _context.Dispositivos.FindAsync(id);
             if (dispositivo == null) return false;
 
-            _context.Dispositivo.Remove(dispositivo);
+            _context.Dispositivos.Remove(dispositivo);
             await _context.SaveChangesAsync();
             return true;
         }
 
+        // Montar objeto Hateoas
         public DispositivoHateoasDto MontarDispositivoComLinks(Dispositivo dispositivo, string urlBase)
         {
             return new DispositivoHateoasDto
             {
                 Id = dispositivo.Id,
-                StatusDispositivo = dispositivo.StatusDispositivo,
+                StatusDispositivo = dispositivo.StatusDispositivo ?? string.Empty,
                 MotoId = dispositivo.MotoId,
                 PatioId = dispositivo.PatioId,
                 Links = new List<LinkDto>

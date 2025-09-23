@@ -1,7 +1,7 @@
-﻿using MottuBracelet.Model;
-using MottuBracelet.DTO;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MottuBracelet.Data;
+using MottuBracelet.DTO;
+using MottuBracelet.Model;
 
 namespace MottuBracelet.Services
 {
@@ -16,7 +16,7 @@ namespace MottuBracelet.Services
 
         public async Task<List<Moto>> ObterPaginadoAsync(int pageNumber, int pageSize)
         {
-            return await _context.Moto
+            return await _context.Motos
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -24,24 +24,24 @@ namespace MottuBracelet.Services
 
         public async Task<int> ContarAsync()
         {
-            return await _context.Moto.CountAsync();
+            return await _context.Motos.CountAsync();
         }
 
         public async Task<Moto?> ObterPorIdAsync(int id)
         {
-            return await _context.Moto.FindAsync(id);
+            return await _context.Motos.FindAsync(id);
         }
 
         public async Task<Moto> CriarAsync(Moto moto)
         {
-            _context.Moto.Add(moto);
+            _context.Motos.Add(moto);
             await _context.SaveChangesAsync();
             return moto;
         }
 
         public async Task<bool> AtualizarAsync(int id, Moto motoAtualizada)
         {
-            var existe = await _context.Moto.AnyAsync(m => m.Id == id);
+            var existe = await _context.Motos.AnyAsync(m => m.Id == id);
             if (!existe) return false;
 
             motoAtualizada.Id = id;
@@ -52,10 +52,10 @@ namespace MottuBracelet.Services
 
         public async Task<bool> RemoverAsync(int id)
         {
-            var moto = await _context.Moto.FindAsync(id);
+            var moto = await _context.Motos.FindAsync(id);
             if (moto == null) return false;
 
-            _context.Moto.Remove(moto);
+            _context.Motos.Remove(moto);
             await _context.SaveChangesAsync();
             return true;
         }

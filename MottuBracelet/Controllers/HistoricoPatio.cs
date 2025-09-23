@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MottuBracelet.Services;
 using MottuBracelet.Model;
+using MottuBracelet.DTO;
 
 namespace MottuBracelet.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class HistoricoPatioController : Controller
+    public class HistoricoPatioController : ControllerBase
     {
         private readonly ServicoHistoricoPatios _servico;
 
@@ -15,22 +16,23 @@ namespace MottuBracelet.Controllers
             _servico = servico;
         }
 
-        // Método para obter todos os históricos cadastrados, aceitando a paginação.
         [HttpGet]
-        public async Task<ActionResult<List<HistoricoPatio>>> ObterTodos(
+        public async Task<ActionResult<List<HistoricoPatioHateoasDto>>> ObterTodos(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
             var historicos = await _servico.ObterPaginadoAsync(pageNumber, pageSize);
             var total = await _servico.ContarAsync();
-
             Response.Headers.Add("X-Total-Count", total.ToString());
-            return historicos;
+
+            var urlBase = $"{Request.Scheme}://{Request.Host}/api";
+            var historicosDto = historicos.Select(h => _servico.MontarHistoricoComLinks(h, urlBase)).ToList();
+
+            return Ok(historicosDto);
         }
 
-        // Método para obter um histórico pelo ID.
         [HttpGet("{id:int}", Name = "ObterHistoricoPatio")]
-        public async Task<ActionResult<HistoricoPatio>> ObterPorId(int id)
+        public async Task<ActionResult<HistoricoPatioHateoasDto>> ObterPorId(int id)
         {
             var historico = await _servico.ObterPorIdAsync(id);
             if (historico == null) return NotFound();
@@ -41,17 +43,19 @@ namespace MottuBracelet.Controllers
             return Ok(historicoHateoas);
         }
 
-        // Método para criar um novo histórico.
         [HttpPost]
-        public async Task<ActionResult<HistoricoPatio>> Criar(HistoricoPatio historico)
+        public async Task<ActionResult<HistoricoPatioHateoasDto>> Criar(HistoricoPatio historico)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             await _servico.CriarAsync(historico);
-            return CreatedAtRoute("ObterHistoricoPatio", new { id = historico.Id }, historico);
+
+            var urlBase = $"{Request.Scheme}://{Request.Host}/api";
+            var historicoHateoas = _servico.MontarHistoricoComLinks(historico, urlBase);
+
+            return CreatedAtRoute("ObterHistoricoPatio", new { id = historico.Id }, historicoHateoas);
         }
 
-        // Método para atualizar os dados de um histórico existente.
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Atualizar(int id, HistoricoPatio historicoAtualizado)
         {
@@ -59,7 +63,6 @@ namespace MottuBracelet.Controllers
             return atualizado ? NoContent() : NotFound();
         }
 
-        // Método para remover um histórico pelo ID.
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Remover(int id)
         {

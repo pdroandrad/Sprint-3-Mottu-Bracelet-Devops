@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MottuBracelet.Services;
 using MottuBracelet.Model;
+using MottuBracelet.DTO;
 
 namespace MottuBracelet.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PatioController : Controller
+    public class PatioController : ControllerBase
     {
         private readonly ServicoPatios _servico;
 
@@ -15,43 +16,45 @@ namespace MottuBracelet.Controllers
             _servico = servico;
         }
 
-        // Método para obter todos os pátios cadastrados, aceitando a paginação.
         [HttpGet]
-        public async Task<ActionResult<List<Patio>>> ObterTodos(
+        public async Task<ActionResult<List<PatioHateoasDto>>> ObterTodos(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
             var patios = await _servico.ObterPaginadoAsync(pageNumber, pageSize);
             var total = await _servico.ContarAsync();
-
             Response.Headers.Add("X-Total-Count", total.ToString());
-            return patios;
+
+            var urlBase = $"{Request.Scheme}://{Request.Host}/api";
+            var patiosDto = patios.Select(p => _servico.MontarPatioComLinks(p, urlBase)).ToList();
+
+            return Ok(patiosDto);
         }
 
-        // Método para obter um pátio pelo ID.
         [HttpGet("{id:int}", Name = "ObterPatio")]
-        public async Task<ActionResult<Patio>> ObterPorId(int id)
+        public async Task<ActionResult<PatioHateoasDto>> ObterPorId(int id)
         {
             var patio = await _servico.ObterPorIdAsync(id);
             if (patio == null) return NotFound();
 
             var urlBase = $"{Request.Scheme}://{Request.Host}/api";
             var patioHateoas = _servico.MontarPatioComLinks(patio, urlBase);
-
             return Ok(patioHateoas);
         }
 
-        // Método para criar um novo pátio.
         [HttpPost]
-        public async Task<ActionResult<Patio>> Criar(Patio patio)
+        public async Task<ActionResult<PatioHateoasDto>> Criar(Patio patio)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             await _servico.CriarAsync(patio);
-            return CreatedAtRoute("ObterPatio", new { id = patio.Id }, patio);
+
+            var urlBase = $"{Request.Scheme}://{Request.Host}/api";
+            var patioHateoas = _servico.MontarPatioComLinks(patio, urlBase);
+
+            return CreatedAtRoute("ObterPatio", new { id = patio.Id }, patioHateoas);
         }
 
-        // Método para atualizar os dados de um pátio existente.
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Atualizar(int id, Patio patioAtualizado)
         {
@@ -59,7 +62,6 @@ namespace MottuBracelet.Controllers
             return atualizado ? NoContent() : NotFound();
         }
 
-        // Método para remover um pátio pelo ID.
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Remover(int id)
         {

@@ -1,6 +1,4 @@
-﻿using MottuBracelet.Model;
-
-namespace MottuBracelet.DTO
+﻿namespace MottuBracelet.DTO
 {
     public class PatioHateoasDto
     {
@@ -8,7 +6,7 @@ namespace MottuBracelet.DTO
         public string Nome { get; set; } = string.Empty;
         public int CapacidadeMaxima { get; set; }
         public string AdministradorResponsavel { get; set; } = string.Empty;
-        public Endereco Endereco { get; set; } = new Endereco();
+        public EnderecoDto Endereco { get; set; } = new EnderecoDto();
         public List<LinkDto> Links { get; set; } = new();
     }
 }

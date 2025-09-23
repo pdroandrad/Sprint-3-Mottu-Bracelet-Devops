@@ -16,7 +16,7 @@ namespace MottuBracelet.Services
 
         public async Task<List<HistoricoPatio>> ObterPaginadoAsync(int pageNumber, int pageSize)
         {
-            return await _context.HistoricoPatio
+            return await _context.HistoricoPatios
                 .Include(h => h.Moto)
                 .Include(h => h.Patio)
                 .Skip((pageNumber - 1) * pageSize)
@@ -26,12 +26,12 @@ namespace MottuBracelet.Services
 
         public async Task<int> ContarAsync()
         {
-            return await _context.HistoricoPatio.CountAsync();
+            return await _context.HistoricoPatios.CountAsync();
         }
 
         public async Task<HistoricoPatio?> ObterPorIdAsync(int id)
         {
-            return await _context.HistoricoPatio
+            return await _context.HistoricoPatios
                 .Include(h => h.Moto)
                 .Include(h => h.Patio)
                 .FirstOrDefaultAsync(h => h.Id == id);
@@ -39,14 +39,14 @@ namespace MottuBracelet.Services
 
         public async Task<HistoricoPatio> CriarAsync(HistoricoPatio historico)
         {
-            _context.HistoricoPatio.Add(historico);
+            _context.HistoricoPatios.Add(historico);
             await _context.SaveChangesAsync();
             return historico;
         }
 
         public async Task<bool> AtualizarAsync(int id, HistoricoPatio historicoAtualizado)
         {
-            var existe = await _context.HistoricoPatio.AnyAsync(h => h.Id == id);
+            var existe = await _context.HistoricoPatios.AnyAsync(h => h.Id == id);
             if (!existe) return false;
 
             historicoAtualizado.Id = id;
@@ -57,10 +57,10 @@ namespace MottuBracelet.Services
 
         public async Task<bool> RemoverAsync(int id)
         {
-            var historico = await _context.HistoricoPatio.FindAsync(id);
+            var historico = await _context.HistoricoPatios.FindAsync(id);
             if (historico == null) return false;
 
-            _context.HistoricoPatio.Remove(historico);
+            _context.HistoricoPatios.Remove(historico);
             await _context.SaveChangesAsync();
             return true;
         }
