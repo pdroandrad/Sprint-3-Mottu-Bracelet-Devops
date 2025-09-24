@@ -26,6 +26,8 @@ jobs:
     
     - name: dotnet publish
       run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp 
+      env: 
+        ConnectionStrings__DefaultConnection: ${{ secrets.ConnectionStrings__DefaultConnection }}
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
