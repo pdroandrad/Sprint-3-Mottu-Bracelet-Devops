@@ -19,10 +19,10 @@ namespace MottuBracelet.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Mapear nomes das tabelas
-            modelBuilder.Entity<Moto>().ToTable("MOTO_NET");
-            modelBuilder.Entity<Patio>().ToTable("PATIO_NET");
-            modelBuilder.Entity<Dispositivo>().ToTable("DISPOSITIVO_NET");
-            modelBuilder.Entity<HistoricoPatio>().ToTable("HISTORICOPATIO_NET");
+            modelBuilder.Entity<Moto>().ToTable("Moto");
+            modelBuilder.Entity<Patio>().ToTable("Patio");
+            modelBuilder.Entity<Dispositivo>().ToTable("Dispositivo");
+            modelBuilder.Entity<HistoricoPatio>().ToTable("HistoricoPatio");
 
             // Relação 1:1 entre Moto e Dispositivo
             modelBuilder.Entity<Moto>()
