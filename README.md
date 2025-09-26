@@ -25,179 +25,110 @@ Esta versão do projeto implementa uma **API RESTful** utilizando **ASP.NET Core
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## 📐 Arquitetura da Solução:
 
-- ASP.NET Core 8.0 Web API  
-- C#  
-- Entity Framework Core  
-- Banco de Dados Oracle  
-- Swagger / OpenAPI  
-- JSON  
-- Visual Studio 2022 ou superior  
+<img width="532" height="289" alt="sprint-3-devops" src="https://github.com/user-attachments/assets/0335b851-39ed-44b9-afa7-6611de1a1834" />
 
----
+## 📂 Execução da aplicação com Banco de Dados SQL em nuvem via Azure CLI
+Roteiro em .txt disponível em [https://github.com/pdroandrad/Sprint-3-Mottu-Bracelet-Devops/blob/main/Rotero_execucao_webapp.txt]
 
-## 📂 Instalação e Execução
-
-### Pré-requisitos
-
-- .NET 8.0 ou superior  
-- Visual Studio 2022 ou superior  
-- Acesso ao banco de dados Oracle com usuário e senha válidos  
-
-### Executando o projeto
-
-1. Clone o repositório:
+1. Registrar Serviços:
 
    ```
-   git clone https://github.com/pdroandrad/Sprint-3-Mottu-Bracelet-CSharp
+   az provider register --namespace Microsoft.Web
+   az provider register --namespace Microsoft.Insights
+   az provider register --namespace Microsoft.OperationalInsights
+   az provider register --namespace Microsoft.ServiceLinker
+   az extension add --name application-insights
    ```
 
-2. Abra o projeto no Visual Studio.
+2. Realizar Fork e clonar repositório GitHub:
+   Link do repositório: [https://github.com/pdroandrad/Sprint-3-Mottu-Bracelet-Devops.git]
+   ```
+   git clone https://github.com/pdroandrad/Sprint-3-Mottu-Bracelet-Devops.git
+   ```
 
-3. Verifique se a string de conexão no `appsettings.json` está correta:
+3. Alterar terminal para Powershall e criar Azure SQL Server:
 
   ```
-  "ConnectionStrings": {
-  "DefaultConnection": "Data Source=oracle.fiap.com.br:1521/orcl; User Id='seu-usuario'; Password='sua-senha';"
-}
-```
+   cd Sprint-3-Mottu-Bracelet-Devops.git
+   .\create-sql-server.ps1
+   ```
 
-4. Rode a aplicação clicando no botão de execução com o protocolo HTTPS selecionado. O Swagger será iniciado automaticamente com os endpoints disponíveis.
+4. Criar tabelas do Banco de Dados:
 
-### 💡 Justificativa das Entidades
+   ```
+   sqlcmd -S tcp:sqlserver-rm558186.database.windows.net,1433 -U admsql -P 'Fiap@2tdsvms' -d mottubraceletdb -i script_bd.sql
+   ```
 
-Escolhemos estas entidades para representar o domínio do sistema MottuBracelet de forma completa:
+5. Alterar terminal para Bash e verificar extensão do application-insights:
 
-- **Moto:** representa cada moto que entra no pátio e precisa ser rastreada.
-- **Dispositivo:** representa o bracelete acoplado à moto, responsável por sinais sonoros e infravermelhos.
-- **Patio:** representa os locais onde as motos são armazenadas ou mantidas.
-- **HistoricoPatio:** registra os movimentos das motos entre pátios, garantindo rastreabilidade e integridade dos dados.
+   ```
+   az extension list -o table
+   ```
 
-Essas entidades permitem um modelo consistente para gerenciar operações de localização, manutenção e histórico de forma eficiente.
+6. Conceder privilégio de execução e rodar o script da aplicação:
 
-## 📡 Endpoints da API
+   ```
+   cd Sprint-3-Mottu-Bracelet-Devops.git
+   chmod +x deploy-mottubracelet-dotnet.sh
+   ./deploy-mottubracelet-dotnet.sh --login-with-GitHub
+   ```
 
-### 🔧 MotoController
+7. No GitHub, adicionar Secrets and Variables:
+   settings > secrets and variables > actions > new repository secrets
 
-| Método | Endpoint             | Descrição                                        |
-|--------|----------------------|--------------------------------------------------|
-| GET    | `/api/Moto`          | Retorna todas as motos com paginação.           |
-| GET    | `/api/Moto/{id}`     | Retorna uma moto específica por ID com links HATEOAS. |
-| POST   | `/api/Moto`          | Cria uma nova moto e associa ao dispositivo informado. |
-| PUT    | `/api/Moto/{id}`     | Atualiza uma moto existente.                    |
-| DELETE | `/api/Moto/{id}`     | Remove uma moto do sistema.                     |
+   - Name: ```ConnectionStrings__DefaultConnection```
+   - Value: ```Server=tcp:sqlserver-rm558186.database.windows.net,1433;Initial Catalog=MottuBraceletDB;User Id=admsql;Password=Fiap@2tdsvms;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;```
+   
+9. Editar arquivo YAML editado dentro da pasta workflows criada na raiz do projeto. Copiar o código abaixo de "run: dotnet publish":
 
----
+   ```
+   env: 
+      ConnectionStrings__DefaultConnection: ${{ secrets.ConnectionStrings__DefaultConnection }}
+   ```
 
-### 🔧 DispositivoController
+10. No Portal da Azure acessar o banco de dados SQL criado e fazer login no Editor de Consultas com login e senha.
+   Caso o IP não esteja liberado, acessar SQL Server > Segurança > Rede > Adicionar o endereço IPv4 do cliente > Salvar
 
-| Método | Endpoint                  | Descrição                                         |
-|--------|---------------------------|--------------------------------------------------|
-| GET    | `/api/Dispositivo`        | Lista todos os dispositivos com paginação.       |
-| GET    | `/api/Dispositivo/{id}`   | Retorna um dispositivo específico por ID com HATEOAS. |
-| POST   | `/api/Dispositivo`        | Cria um novo dispositivo.                        |
-| PUT    | `/api/Dispositivo/{id}`   | Atualiza as informações de um dispositivo existente. |
-| DELETE | `/api/Dispositivo/{id}`   | Remove um dispositivo.                           |
+11. Acessar no browser o endereço ```https://mottubracelet-rm558186.azurewebsites.net/swagger/index.html``` para realização de testes.
 
----
+12. Realizar testes no Swagger:
+    Exemplos de Patios para inserir (POST):
 
-### 🔧 PatioController
+   ```
+   {
+     "nome": "Pátio Central",
+     "capacidadeMaxima": 50,
+     "administradorResponsavel": "João da Silva",
+     "endereco": {
+       "logradouro": "Av. Paulista",
+       "numero": 1000,
+       "cep": "01310-000",
+       "complemento": "Próximo ao metrô Trianon",
+       "cidade": "São Paulo",
+       "pais": "Brasil"
+     }
+   }
+   ```
+   ```
+   {
+     "nome": "Pátio Zona Norte",
+     "capacidadeMaxima": 120,
+     "administradorResponsavel": "Maria Oliveira",
+     "endereco": {
+       "logradouro": "Rua das Flores",
+       "numero": 45,
+       "cep": "02012-030",
+       "complemento": "Ao lado do shopping Norte Center",
+       "cidade": "São Paulo",
+       "pais": "Brasil"
+     }
+   }
+   ```
 
-| Método | Endpoint             | Descrição                                         |
-|--------|----------------------|--------------------------------------------------|
-| GET    | `/api/Patio`         | Retorna todos os pátios cadastrados com paginação. |
-| GET    | `/api/Patio/{id}`    | Retorna um pátio específico por ID com links HATEOAS. |
-| POST   | `/api/Patio`         | Cria um novo pátio.                              |
-| PUT    | `/api/Patio/{id}`    | Atualiza informações de um pátio existente.      |
-| DELETE | `/api/Patio/{id}`    | Remove um pátio do sistema.                      |
+12. Verificar no editor de consultas (Banco de dados SQL, no portal da Azure) as operações CRUD:
 
----
-
-### 🔧 HistoricoPatioController
-
-| Método | Endpoint                    | Descrição                                                |
-|--------|-----------------------------|----------------------------------------------------------|
-| GET    | `/api/HistoricoPatio`       | Lista todos os registros de histórico com paginação.    |
-| GET    | `/api/HistoricoPatio/{id}`  | Retorna um registro de histórico específico por ID com links HATEOAS. |
-| POST   | `/api/HistoricoPatio`       | Cria um novo registro de movimentação de moto entre pátios. |
-
-
-## 📦 Exemplos de Payloads
-
-> **Observação:** Para respeitar os relacionamentos entre as tabelas, crie os objetos na seguinte ordem:  
-> `Patio` → `Dispositivo` → `Moto` → `HistoricoPatio`
-
-### 🔹 Patio
-
-**POST /api/Patio**
-
-```json
-{
-  "nome": "Patio Central",
-  "endereco": "Rua das Flores, 123"
-}
-```
-
-**PUT /api/Patio/{id}**
-
-```json
-{
-  "nome": "Patio Leste",
-  "endereco": "Avenida das Palmeiras, 456"
-}
-```
-
-### 🔹 Dispositivo
-
-**POST /api/Dispositivo**
-
-```json
-{
-  "codigo": "BR-001",
-  "status": "Ativo"
-}
-```
-
-**PUT /api/Dispositivo/{id}**
-
-```json
-{
-  "codigo": "BR-002",
-  "status": "Inativo"
-}
-```
-
-### 🔹 Moto
-
-**POST /api/Moto**
-
-```json
-{
-  "imei": "123456789012345",
-  "placa": "ABC-1234",
-  "dispositivoId": 1
-}
-```
-
-**PUT /api/Moto/{id}**
-
-```json
-{
-  "imei": "987654321098765",
-  "placa": "XYZ-9876",
-  "dispositivoId": 1
-}
-```
-
-### 🔹 HistoricoPatio
-
-**POST /api/HistoricoPatio**
-
-```json
-{
-  "motoId": 1,
-  "patioId": 2,
-  "dataMovimentacao": "2025-09-18T10:00:00"
-}
-```
+   ```
+   Select * from Patio;
+   ```
